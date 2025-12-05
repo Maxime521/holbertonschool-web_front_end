@@ -1,14 +1,14 @@
 // 8-mixin_margins.scss
 
-@mixin margin($right, $left) {
-    margin-right: $right;
-    margin-left: $left;
+@mixin horizontal-margin($value) {
+    margin-right: $value;
+    margin-left: $value;
 }
 
 body {
-    @include horizontal-margins(10px);
+    @include horizontal-margin(10px);
 }
 
 div {
-    @include horizontal-margins(15px);
+    @include horizontal-margin(15px);
 }
