@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+<style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        li {
+            background-color: #e3f2fd;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        li:hover {
+            background-color: #bbdefb;
+        }
+
+        #cart-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #ffffff;
+            border-top: 3px solid #90caf9;
+            padding: 16px 40px 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+
+        #cart-section h2 {
+            margin-bottom: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #90caf9;
+        }
+
+        #cart-section ul {
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        #cart-section li {
+            background-color: #e3f2fd;
+            padding: 10px 16px;
+            margin: 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: auto;
+            flex: 0 0 auto;
+        }
+
+        li.clear-cart {
+            background-color: #ffebee;
+            color: #c62828;
+            font-weight: bold;
+            text-align: center;
+            justify-content: center;
+        }
+
+        li.clear-cart:hover {
+            background-color: #ef9a9a;
+        }
+
+        li.empty-cart {
+            background-color: #f5f5f5;
+            color: #999;
+            cursor: default;
+            text-align: center;
+            justify-content: center;
+        }
+
+        li.empty-cart:hover {
+            background-color: #f5f5f5;
+        }
+
+        li.cart-item {
+            cursor: default;
+        }
+
+        li.cart-item:hover {
+            background-color: #e3f2fd;
+        }
+
+        .remove-btn {
+            cursor: pointer;
+            color: #e53935;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1;
+            padding: 0 4px;
+            transition: color 0.2s;
+        }
+
+        .remove-btn:hover {
+            color: #b71c1c;
+        }
+
+        body {
+            padding-bottom: 220px;
+        }
+    </style>
+</head>
+<body>
+<script>
+        const availableItems = ['Shampoo', 'Soap', 'Sponge', 'Water'];
+
+        function isSessionStorageAvailable() {
+            try {
+                const test = '__sessionStorage_test__';
+                sessionStorage.setItem(test, test);
+                sessionStorage.removeItem(test);
+                return true;
+            } catch(e) {
+                return false;
+            }
+        }
+
+        function getCartFromStorage() {
+            const cart = sessionStorage.getItem('cart');
+            if (cart) {
+                return JSON.parse(cart);
+            }
+            return {};
+        }
+
+        function addItemToCart(item) {
+            const cart = getCartFromStorage();
+            
+            if (cart[item]) {
+                cart[item] = cart[item] + 1;
+            } else {
+                cart[item] = 1;
+            }
+            
+            sessionStorage.setItem('cart', JSON.stringify(cart));
+            displayCart();
+        }
+
+        function removeItemfromCart(item) {
+            const cart = getCartFromStorage();
+            delete cart[item];
+            sessionStorage.setItem('cart', JSON.stringify(cart));
+            displayCart();
+        }
+
+        function clearCart() {
+            sessionStorage.clear();
+            displayCart();
+        }
+
+        function createStore() {
+            const h2 = document.createElement('h2');
+            h2.textContent = 'Available products:';
+            document.body.appendChild(h2);
+            
+            const ul = document.createElement('ul');
+            
+            availableItems.forEach(function(item) {
+                const li = document.createElement('li');
+                li.textContent = item;
+                li.onclick = function() {
+                    addItemToCart(item);
+                };
+                ul.appendChild(li);
+            });
+            
+            document.body.appendChild(ul);
+        }
+
+        function displayCart() {
+            let cartSection = document.getElementById('cart-section');
+
+            if (!cartSection) {
+                cartSection = document.createElement('div');
+                cartSection.id = 'cart-section';
+
+                const h2 = document.createElement('h2');
+                h2.textContent = 'Your cart:';
+                cartSection.appendChild(h2);
+
+                const cartDiv = document.createElement('div');
+                cartDiv.id = 'cart';
+                cartSection.appendChild(cartDiv);
+
+                document.body.appendChild(cartSection);
+            } else {
+                const cartDiv = document.getElementById('cart');
+                while (cartDiv.firstChild) {
+                    cartDiv.removeChild(cartDiv.firstChild);
+                }
+            }
+            
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartDiv = document.getElementById('cart');
+            const cart = getCartFromStorage();
+            const ul = document.createElement('ul');
+            
+            const cartKeys = Object.keys(cart);
+            
+            if (cartKeys.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = 'Your cart is empty';
+                li.className = 'empty-cart';
+                ul.appendChild(li);
+            } else {
+                const clearLi = document.createElement('li');
+                clearLi.textContent = 'Clear my cart';
+                clearLi.className = 'clear-cart';
+                clearLi.onclick = function() {
+                    clearCart();
+                };
+                ul.appendChild(clearLi);
+                
+                cartKeys.forEach(function(item) {
+                    const li = document.createElement('li');
+                    li.className = 'cart-item';
+                    
+                    const itemText = document.createElement('span');
+                    itemText.textContent = item + ' x ' + cart[item];
+                    
+                    const removeBtn = document.createElement('span');
+                    removeBtn.textContent = '✕';
+                    removeBtn.className = 'remove-btn';
+                    removeBtn.onclick = function() {
+                        removeItemfromCart(item);
+                    };
+                    
+                    li.appendChild(itemText);
+                    li.appendChild(removeBtn);
+                    ul.appendChild(li);
+                });
+            }
+            
+            cartDiv.appendChild(ul);
+        }
+
+        if (!isSessionStorageAvailable()) {
+            alert('Sorry, your browser does not support Web storage. Try again with a better one');
+        } else {
+            createStore();
+            displayCart();
+        }
+</script>
+</body>
+</html>
